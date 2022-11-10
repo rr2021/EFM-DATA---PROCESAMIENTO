@@ -1,0 +1,46 @@
+#======================================================
+# Importing libraries
+#======================================================
+from glob import glob
+import datetime
+import matplotlib.pyplot as plt
+import pandas as pd
+
+#======================================================
+# Dataframe importado a PANDAS
+#======================================================
+All_files = glob(r'C:\Users\rr98\OneDrive\CAMPO ELECTRICO ATMOSFERICO\DATA\2019\*.efm')
+
+headers = ('H','PG')
+
+for file in All_files:
+
+    name = file.split('.efm')[0]
+
+    df = pd.read_csv(file,usecols=(0,1),
+                      names=headers,
+                      skiprows=0)
+    hourday=[]
+    for i in range(len(df['H'])):
+        hour = datetime.datetime.strptime(df['H'][i],'%H:%M:%S') 
+        HH=(hour.strftime('%H')) # save hour
+        MM=(hour.strftime('%M')) # save minute
+        SS=(hour.strftime('%S')) # save second
+        hourday.append(float(HH)+float(MM)/60.+float(SS)/3600.)   
+    
+    df['PG']=(df['PG']+0.083670597)/0.0048953412
+    
+    x,y = hourday, df['PG']
+    
+    fig, ax = plt.subplots(figsize=(6,4))
+    
+    ax.plot(hourday,y,'g')
+    ax.set_title(name[-12:]+'.efm', loc="center" ,y=1.12, pad=-20)
+    plt.ylabel('V/m') #,fontsize=80#
+    plt.xlabel('Hour [UT]' )  #,fontsize=80#
+    #plt.ylim([60,180]) 
+    plt.xlim([0,24] )
+    plt.xticks([0,2,4,6,8,10,12,14,16,18,20,22,24])
+    plt.grid()
+   
+    plt.savefig(name+'.jpg', dpi=400)
